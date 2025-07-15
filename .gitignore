@@ -12,6 +12,7 @@
 .idea
 .vscode
 .DS_Store
+wallet.iml
 
 **/vendor/**
 */vendor/*
