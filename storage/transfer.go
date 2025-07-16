@@ -11,6 +11,7 @@ import (
 type Transfer struct {
 	ID                      int64           `gorm:"primaryKey;autoIncrement" json:"id"`
 	Type                    string          `gorm:"type:varchar(36);not null;default:''" json:"type"`
+	TxType                  string          `gorm:"type:varchar(36);not null;default:''" json:"tx_type"`
 	TransactionID           string          `gorm:"type:varchar(36);not null;uniqueIndex:uk_transaction_id" json:"transaction_id"`
 	ReferenceID             string          `gorm:"type:varchar(36);not null;uniqueIndex:uk_reference_id" json:"reference_id"`
 	Status                  string          `gorm:"type:varchar(36);not null;default:''" json:"status"`
@@ -36,9 +37,9 @@ type transferDAO struct {
 	DB *gorm.DB
 }
 
-// todo add mockery
 type ITransferDAO interface {
 	FindByReferenceID(ctx context.Context, referenceID string) (*Transfer, error)
+	FindByAccountIDWithCursor(ctx context.Context, accountID string, limit int, beforeTimestamp *time.Time) ([]*Transfer, error)
 	RunInTransaction(fn TxFn, opts ...*sql.TxOptions) error
 }
 
@@ -59,4 +60,32 @@ func (t *transferDAO) FindByReferenceID(ctx context.Context, referenceID string)
 
 func (t *transferDAO) RunInTransaction(fn TxFn, opts ...*sql.TxOptions) error {
 	return t.DB.Transaction(fn, opts...)
+}
+
+func (t *transferDAO) FindByAccountIDWithCursor(
+	ctx context.Context,
+	accountID string,
+	limit int,
+	beforeTimestamp *time.Time,
+) ([]*Transfer, error) {
+
+	query := t.DB.WithContext(ctx).
+		Where("source_account_id = ?", accountID).
+		Or("destination_account_id = ?", accountID)
+
+	// Only fetch older transactions if cursor exists
+	if beforeTimestamp != nil {
+		query = query.Where("created_at < ?", *beforeTimestamp)
+	}
+
+	var txs []*Transfer
+	err := query.
+		Order("created_at DESC, id DESC"). // ensure deterministic ordering
+		Limit(limit).
+		Find(&txs).Error
+
+	if err != nil {
+		return nil, err
+	}
+	return txs, nil
 }

@@ -93,3 +93,82 @@ func TestRetry(t *testing.T) {
 		})
 	}
 }
+
+func TestEncodeNextToken(t *testing.T) {
+	tests := []struct {
+		name     string
+		cursor   DataCursor
+		expected string
+	}{
+		{
+			name: "normal case",
+			cursor: DataCursor{
+				LastTimestamp: time.Date(2025, 7, 15, 10, 0, 0, 0, time.UTC),
+				LastID:        "12345",
+			},
+			expected: "eyJsYXN0VGltZXN0YW1wIjoiMjAyNS0wNy0xNVQxMDowMDowMFoiLCJsYXN0SUQiOiIxMjM0NSJ9",
+		},
+		{
+			name: "empty fields",
+			cursor: DataCursor{
+				LastTimestamp: time.Time{},
+				LastID:        "",
+			},
+			expected: "eyJsYXN0VGltZXN0YW1wIjoiMDAwMS0wMS0wMVQwMDowMDowMFoiLCJsYXN0SUQiOiIifQ==",
+		},
+		{
+			name: "special characters in ID",
+			cursor: DataCursor{
+				LastTimestamp: time.Date(2025, 7, 15, 10, 0, 0, 0, time.UTC),
+				LastID:        "ID@#&!%",
+			},
+			expected: "eyJsYXN0VGltZXN0YW1wIjoiMjAyNS0wNy0xNVQxMDowMDowMFoiLCJsYXN0SUQiOiJJREAjXHUwMDI2ISUifQ==",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := EncodeNextToken(tt.cursor)
+			if result != tt.expected {
+				t.Errorf("expected: %v, got: %v", tt.expected, result)
+			}
+		})
+	}
+}
+
+func TestDecodeNextToken(t *testing.T) {
+	tests := []struct {
+		name     string
+		token    string
+		expected *DataCursor
+		err      error
+	}{
+		{
+			name:  "valid token",
+			token: "eyJsYXN0VGltZXN0YW1wIjoiMjAyNS0wNy0xNVQxMDowMDowMFoiLCJsYXN0SUQiOiIxMjM0NSJ9",
+			expected: &DataCursor{
+				LastTimestamp: time.Date(2025, 7, 15, 10, 0, 0, 0, time.UTC),
+				LastID:        "12345",
+			},
+			err: nil,
+		},
+		{
+			name:     "empty token",
+			token:    "",
+			expected: nil,
+			err:      nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := DecodeNextToken(tt.token)
+			if (tt.err == nil && err != nil) || (tt.err != nil && err == nil) || (tt.err != nil && !errors.Is(err, tt.err)) {
+				t.Errorf("expected error: %v, got: %v", tt.err, err)
+			}
+			if (result == nil) != (tt.expected == nil) || (result != nil && *result != *tt.expected) {
+				t.Errorf("expected: %v, got: %v", tt.expected, result)
+			}
+		})
+	}
+}

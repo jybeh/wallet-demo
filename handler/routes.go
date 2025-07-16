@@ -36,7 +36,7 @@ func (p *WalletService) RegisterRoutes(ge *gin.Engine) {
 
 	v1accounts := v1.Group("/accounts")
 	{
-		v1accounts.GET("/:accountID/transactions", p.GetAccountTransactions)
+		v1accounts.POST("/transactions/query", p.GetAccountTransactions)
 		v1accounts.POST("/query", p.GetAccountDetails)
 		v1accounts.POST("/withdrawals", p.CreateWithdrawal)
 		v1accounts.POST("/deposits", p.CreateDeposit)

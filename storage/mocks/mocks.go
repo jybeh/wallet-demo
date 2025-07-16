@@ -7,6 +7,7 @@ package storage
 import (
 	"context"
 	"database/sql"
+	"time"
 	"wallet/storage"
 
 	mock "github.com/stretchr/testify/mock"
@@ -222,6 +223,86 @@ type MockITransferDAO_Expecter struct {
 
 func (_m *MockITransferDAO) EXPECT() *MockITransferDAO_Expecter {
 	return &MockITransferDAO_Expecter{mock: &_m.Mock}
+}
+
+// FindByAccountIDWithCursor provides a mock function for the type MockITransferDAO
+func (_mock *MockITransferDAO) FindByAccountIDWithCursor(ctx context.Context, accountID string, limit int, beforeTimestamp *time.Time) ([]*storage.Transfer, error) {
+	ret := _mock.Called(ctx, accountID, limit, beforeTimestamp)
+
+	if len(ret) == 0 {
+		panic("no return value specified for FindByAccountIDWithCursor")
+	}
+
+	var r0 []*storage.Transfer
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, int, *time.Time) ([]*storage.Transfer, error)); ok {
+		return returnFunc(ctx, accountID, limit, beforeTimestamp)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, int, *time.Time) []*storage.Transfer); ok {
+		r0 = returnFunc(ctx, accountID, limit, beforeTimestamp)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*storage.Transfer)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, int, *time.Time) error); ok {
+		r1 = returnFunc(ctx, accountID, limit, beforeTimestamp)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockITransferDAO_FindByAccountIDWithCursor_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'FindByAccountIDWithCursor'
+type MockITransferDAO_FindByAccountIDWithCursor_Call struct {
+	*mock.Call
+}
+
+// FindByAccountIDWithCursor is a helper method to define mock.On call
+//   - ctx context.Context
+//   - accountID string
+//   - limit int
+//   - beforeTimestamp *time.Time
+func (_e *MockITransferDAO_Expecter) FindByAccountIDWithCursor(ctx interface{}, accountID interface{}, limit interface{}, beforeTimestamp interface{}) *MockITransferDAO_FindByAccountIDWithCursor_Call {
+	return &MockITransferDAO_FindByAccountIDWithCursor_Call{Call: _e.mock.On("FindByAccountIDWithCursor", ctx, accountID, limit, beforeTimestamp)}
+}
+
+func (_c *MockITransferDAO_FindByAccountIDWithCursor_Call) Run(run func(ctx context.Context, accountID string, limit int, beforeTimestamp *time.Time)) *MockITransferDAO_FindByAccountIDWithCursor_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 int
+		if args[2] != nil {
+			arg2 = args[2].(int)
+		}
+		var arg3 *time.Time
+		if args[3] != nil {
+			arg3 = args[3].(*time.Time)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
+	})
+	return _c
+}
+
+func (_c *MockITransferDAO_FindByAccountIDWithCursor_Call) Return(transfers []*storage.Transfer, err error) *MockITransferDAO_FindByAccountIDWithCursor_Call {
+	_c.Call.Return(transfers, err)
+	return _c
+}
+
+func (_c *MockITransferDAO_FindByAccountIDWithCursor_Call) RunAndReturn(run func(ctx context.Context, accountID string, limit int, beforeTimestamp *time.Time) ([]*storage.Transfer, error)) *MockITransferDAO_FindByAccountIDWithCursor_Call {
+	_c.Call.Return(run)
+	return _c
 }
 
 // FindByReferenceID provides a mock function for the type MockITransferDAO

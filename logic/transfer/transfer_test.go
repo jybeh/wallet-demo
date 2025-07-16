@@ -125,6 +125,11 @@ func Test_logicImpl_CreateTransfer(t *testing.T) {
 					mc := &storagemock.MockITransferDAO{}
 					mc.On("FindByReferenceID", context.Background(), "idempotency-key").Return(nil, gorm.ErrRecordNotFound).Once()
 					mc.On("RunInTransaction", mock.AnythingOfType("storage.TxFn")).Return(nil).Once()
+					mc.On("FindByReferenceID", context.Background(), "idempotency-key").Return(&storage.Transfer{
+						Status:      "COMPLETED",
+						ReferenceID: "idempotency-key",
+						Amount:      1000,
+					}, nil).Once()
 					return mc
 				}(),
 				AccountDAO: func() storage.IAccountDAO {
@@ -159,7 +164,11 @@ func Test_logicImpl_CreateTransfer(t *testing.T) {
 					TxType: TxTypeP2PTransfer,
 				},
 			},
-			want:    nil, // The function currently returns nil, nil at the end
+			want: &dto.CreateTransferResponse{
+				IdempotencyKey: "idempotency-key",
+				Amount:         1000,
+				Status:         "COMPLETED",
+			},
 			wantErr: false,
 		},
 		{
@@ -169,6 +178,11 @@ func Test_logicImpl_CreateTransfer(t *testing.T) {
 					mc := &storagemock.MockITransferDAO{}
 					mc.On("FindByReferenceID", context.Background(), "idempotency-key").Return(nil, gorm.ErrRecordNotFound).Once()
 					mc.On("RunInTransaction", mock.AnythingOfType("storage.TxFn")).Return(nil).Once()
+					mc.On("FindByReferenceID", context.Background(), "idempotency-key").Return(&storage.Transfer{
+						Status:      "COMPLETED",
+						ReferenceID: "idempotency-key",
+						Amount:      1000,
+					}, nil).Once()
 					return mc
 				}(),
 				AccountDAO: func() storage.IAccountDAO {
@@ -204,7 +218,11 @@ func Test_logicImpl_CreateTransfer(t *testing.T) {
 					TxType: TxTypeWithdrawal,
 				},
 			},
-			want:    nil, // The function currently returns nil, nil at the end
+			want: &dto.CreateTransferResponse{
+				IdempotencyKey: "idempotency-key",
+				Amount:         1000,
+				Status:         "COMPLETED",
+			},
 			wantErr: false,
 		},
 		{
@@ -214,6 +232,11 @@ func Test_logicImpl_CreateTransfer(t *testing.T) {
 					mc := &storagemock.MockITransferDAO{}
 					mc.On("FindByReferenceID", context.Background(), "idempotency-key").Return(nil, gorm.ErrRecordNotFound).Once()
 					mc.On("RunInTransaction", mock.AnythingOfType("storage.TxFn")).Return(nil).Once()
+					mc.On("FindByReferenceID", context.Background(), "idempotency-key").Return(&storage.Transfer{
+						Status:      "COMPLETED",
+						ReferenceID: "idempotency-key",
+						Amount:      1000,
+					}, nil).Once()
 					return mc
 				}(),
 				AccountDAO: func() storage.IAccountDAO {
@@ -249,7 +272,11 @@ func Test_logicImpl_CreateTransfer(t *testing.T) {
 					TxType: TxTypeDeposit,
 				},
 			},
-			want:    nil, // The function currently returns nil, nil at the end
+			want: &dto.CreateTransferResponse{
+				IdempotencyKey: "idempotency-key",
+				Amount:         1000,
+				Status:         "COMPLETED",
+			},
 			wantErr: false,
 		},
 	}

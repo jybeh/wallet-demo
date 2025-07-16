@@ -1,0 +1,239 @@
+{
+	"info": {
+		"_postman_id": "09d28d8e-8c8b-4550-8885-074d84e11fe6",
+		"name": "Wallet Demo",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "6254726"
+	},
+	"item": [
+		{
+			"name": "Get Transactions",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var uuid = require('uuid');",
+							"var myUUID = uuid.v4();",
+							"console.log(myUUID)",
+							"pm.environment.set('idempotency_key', '\"' + myUUID + '\"')"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"accountID\": \"12345678\",\n    \"nextToken\": \"\",\n    \"limit\": 3\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/v1/accounts/transactions/query",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"accounts",
+						"transactions",
+						"query"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Account Detail",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var uuid = require('uuid');",
+							"var myUUID = uuid.v4();",
+							"console.log(myUUID)",
+							"pm.environment.set('idempotency_key', '\"' + myUUID + '\"')"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"accountID\": \"12345678\",\n    \"nextToken\": \"\",\n    \"limit\": 3\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/v1/accounts/transactions/query",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"accounts",
+						"transactions",
+						"query"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Withdrawal",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var uuid = require('uuid');",
+							"var myUUID = uuid.v4();",
+							"console.log(myUUID)",
+							"pm.environment.set('idempotency_key', '\"' + myUUID + '\"')"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"idempotencyKey\": {{idempotency_key}},\n    \"accountID\": \"12345678\",\n    \"amount\": 1234,\n    \"currency\": \"MYR\",\n    \"note\": \"some notes\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/v1/accounts/withdrawals",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"accounts",
+						"withdrawals"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deposit",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var uuid = require('uuid');",
+							"var myUUID = uuid.v4();",
+							"console.log(myUUID)",
+							"pm.environment.set('idempotency_key', '\"' + myUUID + '\"')"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"accountID\": \"12345678\",\n    \"nextToken\": \"\",\n    \"limit\": 3\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/v1/accounts/transactions/query",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"accounts",
+						"transactions",
+						"query"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Balance Transfer",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var uuid = require('uuid');",
+							"var myUUID = uuid.v4();",
+							"console.log(myUUID)",
+							"pm.environment.set('idempotency_key', '\"' + myUUID + '\"')"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"accountID\": \"12345678\",\n    \"nextToken\": \"\",\n    \"limit\": 3\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/v1/accounts/transactions/query",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"accounts",
+						"transactions",
+						"query"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

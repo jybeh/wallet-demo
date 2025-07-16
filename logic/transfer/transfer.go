@@ -13,6 +13,13 @@ import (
 	"wallet/util"
 )
 
+const (
+	TxStatusPROCESSING = "PROCESSING"
+	TxStatusCOMPLETED  = "COMPLETED"
+	TypeDebit          = "debit"
+	TypeCredit         = "credit"
+)
+
 var (
 	InsufficientBalanceErr       = errors.New("insufficient balance")
 	InvalidAmountErr             = errors.New("invalid amount")
@@ -53,7 +60,7 @@ type TxType string
 
 const (
 	TxTypeWithdrawal  TxType = "WITHDRAWAL"
-	TxTypeP2PTransfer TxType = "P2P_TRANSFER"
+	TxTypeP2PTransfer TxType = "TRANSFER"
 	TxTypeDeposit     TxType = "DEPOSIT"
 )
 
@@ -85,7 +92,7 @@ func (l *logicImpl) CreateTransfer(ctx context.Context, req *dto.CreateTransferR
 
 	transactionID := uuid.New().String()
 
-	transferRecord := mapCreateTransferRequestToTransfer(req, transactionID)
+	transferRecord := mapCreateTransferRequestToTransfer(req, transactionID, opts)
 
 	if doErr := util.Retry(func() error {
 		return l.doTransfer(ctx, transferRecord, opts)
@@ -100,8 +107,12 @@ func (l *logicImpl) CreateTransfer(ctx context.Context, req *dto.CreateTransferR
 	}
 
 	// find data and return
+	finalTx, err := l.TransferDAO.FindByReferenceID(ctx, req.IdempotencyKey)
+	if err != nil {
+		return nil, err
+	}
 
-	return nil, nil
+	return mapTransferStorageToResponse(finalTx), nil
 }
 
 func (l *logicImpl) doTransfer(ctx context.Context, req *storage.Transfer, opts *CreateTransferOpts) error {
@@ -160,11 +171,10 @@ func (l *logicImpl) doTransfer(ctx context.Context, req *storage.Transfer, opts 
 		// Create Source Transaction (debit)
 		if srcTxErr := tx.Create(&storage.Transaction{
 			AccountID: req.SourceAccountID,
-			Type:      "debit",
+			Type:      TypeDebit,
 			Amount:    req.Amount,
 			Currency:  req.Currency,
 			Note:      fmt.Sprintf("Transfer to %s", req.DestinationAccountID),
-			//Properties: req.Properties,
 			Timestamp: req.CreatedAt,
 			ValuedAt:  req.CreatedAt,
 			CreatedAt: req.CreatedAt,
@@ -176,11 +186,10 @@ func (l *logicImpl) doTransfer(ctx context.Context, req *storage.Transfer, opts 
 		// Create Destination Transaction (credit)
 		if dstTxErr := tx.Create(&storage.Transaction{
 			AccountID: req.DestinationAccountID,
-			Type:      "credit",
+			Type:      TypeCredit,
 			Amount:    req.Amount,
 			Currency:  req.Currency,
 			Note:      fmt.Sprintf("Transfer from %s", req.SourceAccountID),
-			//Properties: req.Properties,
 			Timestamp: req.CreatedAt,
 			ValuedAt:  req.CreatedAt,
 			CreatedAt: req.CreatedAt,
@@ -196,7 +205,7 @@ func (l *logicImpl) doTransfer(ctx context.Context, req *storage.Transfer, opts 
 			return fmt.Errorf("destination account update failed: %w", updateBalanceErr)
 		}
 		// Update transfer status to success
-		req.Status = "COMPLETED"
+		req.Status = TxStatusCOMPLETED
 		req.UpdatedAt = time.Now()
 		if saveErr := tx.Save(req).Error; saveErr != nil {
 			return saveErr
@@ -206,13 +215,14 @@ func (l *logicImpl) doTransfer(ctx context.Context, req *storage.Transfer, opts 
 	return createTransferErr
 }
 
-func mapCreateTransferRequestToTransfer(req *dto.CreateTransferRequest, transactionID string) *storage.Transfer {
+func mapCreateTransferRequestToTransfer(req *dto.CreateTransferRequest, transactionID string, opts *CreateTransferOpts) *storage.Transfer {
 	now := time.Now()
 	trf := &storage.Transfer{
+		TxType:               string(opts.TxType),
 		Type:                 "INTRA",
 		TransactionID:        transactionID,
 		ReferenceID:          req.IdempotencyKey,
-		Status:               "PROCESSING",
+		Status:               TxStatusPROCESSING,
 		Amount:               req.Amount,
 		Currency:             req.Currency,
 		SourceAccountID:      req.SourceAccount.Number,

@@ -1,5 +1,7 @@
 package dto
 
+import "time"
+
 type CreateTransferRequest struct {
 	Currency           string                             `json:"currency" binding:"required,oneof=MYR"`
 	Amount             int64                              `json:"amount" binding:"required,gt=0"`        // must be positive, in minor unit
@@ -46,4 +48,25 @@ type CreateWithdrawalRequest struct {
 type CreateWithdrawalResponse struct {
 	TransactionID string `json:"transactionID"`
 	Status        string `json:"status"`
+}
+
+type GetAccountTransactionsRequest struct {
+	AccountID string `json:"accountID" binding:"required"`
+	Limit     int    `json:"limit" binding:"omitempty,min=1,max=100"`
+	NextToken string `json:"nextToken" binding:"omitempty"`
+}
+
+type TransactionResponse struct {
+	TransactionID string    `json:"transactionID"`
+	TxType        string    `json:"txType"`
+	Status        string    `json:"status"`
+	Amount        int64     `json:"amount"`
+	Currency      string    `json:"currency"`
+	CreatedAt     time.Time `json:"createdAt"`
+	Note          string    `json:"note"`
+}
+
+type GetAccountTransactionsResponse struct {
+	Data      []*TransactionResponse `json:"data"`
+	NextToken string                 `json:"nextToken,omitempty"`
 }
